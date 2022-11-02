@@ -15,14 +15,16 @@ def stratified_random_sample(file_path):
     # Read csv in as a pandas DataFrame
     data = pd.read_csv(file_path)
     
-    # Remove rows with nan values in StartDateTime column
-    wo_nan = data[data.StartDateTime == data.StartDateTime]
+    # Remove rows with nan values in StartDateTime column and Comment column
+    wo_nan = data[(data.StartDateTime == data.StartDateTime) | (data.Comment == data.Comment)]
+    
+    # Create a new column in wo_nan that will hold out hour values as integers (0-23)
     
     # Retrieve the hour from each StartDateTime value
-    hours = wo_nan.get("StartDateTime").apply(lambda x: x.split(" ")[1] if type(x) == str else x)
+    wo_nan["Hour"] = wo_nan.get("StartDateTime").apply(lambda x: int(x.split(" ")[1].split(":")[0]) if type(x) == str else x)
     
-    # Create a new column with the integer value of the hour (0-23)
-    wo_nan["Hour"] = list(map(lambda x: int(x.split(":")[0]), hours))
+    # Retrieve the hour from each Comment value
+    wo_nan["Hour"] = wo_nan.get("Comment").apply(lambda x: int(x.split(":")[0].split(" ")[-1]) if type(x) == str else x)
     
     # Assuming the duration is measured in seconds, filter out only the minute-long clips
     minute_long = wo_nan[wo_nan.Duration >= 60]
@@ -62,5 +64,6 @@ def stratified_random_sample(file_path):
     
     return new_file_path
         
-    
+# file_name = "/Users/saathvikdirisala/Desktop/acoustic-species-id-intro/Peru_2019_AudioMoth_Data_Full.csv"
 
+# stratified_random_sample(file_name)
